@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from .base import ConnectInfo
+from .connect import ConnectInfo
 
 
 class DisconnectApplyer:

@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from .base import ConnectInfo, ConnectChecker
+from .connect import ConnectInfo, ConnectChecker
 
 
 class DisconnectInfoCollector:
@@ -30,16 +30,16 @@ class DisconnectInfoCollector:
         if not info.is_connect:
             self._disconnect_infos.append(info)
 
-    def _collect_recursive(self, current_cols: List[str], start: int):        
+    def _collect_disconnect_infos_recursive(self, current_cols: List[str], start: int):        
         if len(current_cols) == self._n_dim + 2:
             combinations = self._get_combinations(current_cols)
-            for x, y, zs in combinations:
-                self._collect_if_disconnect(col1=x, col2=y, cond_cols=zs)
+            for col1, col2, cond_cols in combinations:
+                self._collect_if_disconnect(col1=col1, col2=col2, cond_cols=cond_cols)
             return
         
         for i in range(start, len(self._df_columns)):
             next_cols = [*current_cols, self._df_columns[i]]
-            self._collect_recursive(next_cols, i + 1)
+            self._collect_disconnect_infos_recursive(current_cols=next_cols, start=i+1)
 
     def run(self):        
-        self._collect_recursive(current_cols=[], start=0)
+        self._collect_disconnect_infos_recursive(current_cols=[], start=0)

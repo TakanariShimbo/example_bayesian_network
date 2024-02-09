@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-def viz_network(connect_df: pd.DataFrame, title):
+def viz_network(connect_df: pd.DataFrame, title: str):
     df_columns = connect_df.columns.to_numpy()
     
     connect_pairs = []
