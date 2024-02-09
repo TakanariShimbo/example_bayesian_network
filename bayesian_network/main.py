@@ -7,7 +7,6 @@ from pgmpy.estimators import ConstraintBasedEstimator
 from .connect import ConnectChecker
 from .collector import DisconnectInfoCollector
 from .applyer import DisconnectApplyer
-from .viz import viz_network
 
 
 class BayesianNetwork:
@@ -36,12 +35,12 @@ class BayesianNetwork:
         print(f"==================== DIM{n_dim} ====================")
         connect_checker = ConnectChecker(estimator=estimator, p_threshold=p_threshold)
         print()
-        
+
         print(f"-------------------- COLECT --------------------")
         collector = DisconnectInfoCollector(n_dim=n_dim, connect_df=connect_df, connect_checker=connect_checker)
         collector.run()
         print()
-        
+
         print(f"-------------------- APPLY --------------------")
         new_connect_df = connect_df.copy()
         applyer = DisconnectApplyer(n_dim=n_dim, connect_df=new_connect_df, disconnect_infos=collector._disconnect_infos)
@@ -52,14 +51,8 @@ class BayesianNetwork:
         return new_connect_df
 
     def run(self):
-        for n_dim in range(self._n_dim_total+1):
-            new_connect_df = self._run_step(n_dim=n_dim, estimator=self._estimator, connect_df=self._connect_dfs[-1], p_threshold = 0.05)
+        for n_dim in range(self._n_dim_total + 1):
+            new_connect_df = self._run_step(n_dim=n_dim, estimator=self._estimator, connect_df=self._connect_dfs[-1], p_threshold=0.05)
             self._connect_dfs.append(new_connect_df)
-
-    def viz(self):
-        labels = ["Init"]
-        for i in range(self._n_dim_total+1):
-            labels.append(f"Level{i}")
-
-        for label, connect_df in zip(labels, self._connect_dfs):
-            viz_network(connect_df, f"Network {label}")
+        
+        return self._connect_dfs

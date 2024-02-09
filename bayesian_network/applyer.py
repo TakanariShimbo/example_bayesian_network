@@ -19,7 +19,7 @@ class DisconnectApplyer:
         permus = list(itertools.permutations(np.arange(n_dim) + 2))
         result = []
         for digits in permus:
-            middle_digits_str = ''.join(map(str, digits))
+            middle_digits_str = "".join(map(str, digits))
             digits_str = f"0{middle_digits_str}1"
             result.append(digits_str)
         return result
