@@ -24,8 +24,17 @@ class DisconnectApplyer:
         return result
 
     @staticmethod
-    def _check_xxxxx_connect(xxxxx: str, cols: List[str], connect_df: pd.DataFrame) -> bool:
-        idx_pairs = [
+    def _check_ab_connect(idx_pair: List[int], cols: List[str], connect_df: pd.DataFrame) -> bool:
+        idx_pair.sort()
+        idx_a, idx_b = idx_pair
+        col_a = cols[idx_a]
+        col_b = cols[idx_b]
+        is_ab_connect = connect_df.loc[col_a, col_b]
+        return is_ab_connect  # type: ignore
+
+    @staticmethod
+    def _convert_xxxxx_to_idx_pairs(xxxxx: str) -> List[List[int]]:
+        return [
             [
                 int(xxxxx[i]),
                 int(xxxxx[i + 1]),
@@ -33,21 +42,22 @@ class DisconnectApplyer:
             for i in range(len(xxxxx) - 1)
         ]
 
-        is_connect = True
+    def _check_xxxxx_connect(self, xxxxx: str, cols: List[str]) -> bool:
+        idx_pairs = self._convert_xxxxx_to_idx_pairs(xxxxx=xxxxx)
+
+        is_xxxxx_connect = True
         for idx_pair in idx_pairs:
-            idx_pair.sort()
-            idx1, idx2 = idx_pair
-            is_connect_: bool = connect_df.loc[cols[idx1], cols[idx2]]
-            is_connect = is_connect and is_connect_
-            if not is_connect:
+            is_ab_connect = self._check_ab_connect(idx_pair=idx_pair, cols=cols, connect_df=self._connect_df)
+            is_xxxxx_connect = is_xxxxx_connect and is_ab_connect
+            if not is_xxxxx_connect:
                 break
-        return is_connect
+        return is_xxxxx_connect
 
     def _check_xxxxxs_connect(self, cols: List[str]) -> bool:
         xxxxxs = self._generate_xxxxxs(n_dim=self._n_dim)
         for xxxxx in xxxxxs:
-            is_connect = self._check_xxxxx_connect(xxxxx=xxxxx, cols=cols, connect_df=self._connect_df)
-            if is_connect:
+            is_xxxxx_connect = self._check_xxxxx_connect(xxxxx=xxxxx, cols=cols)
+            if is_xxxxx_connect:
                 return True
         return False
 
