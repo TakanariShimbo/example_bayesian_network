@@ -21,8 +21,7 @@ def chi_square_test(col1: str, col2: str, cond_cols: List[str], bin_df: pd.DataF
             bin_df.groupby([col1, col2]).size().unstack(col2, fill_value=0), lambda_="pearson"
         )
 
-    # Step 3: If there are conditionals variables, iterate over unique states and do
-    #         the contingency test.
+    # Step 3: If there are conditionals variables, iterate over unique states and do the contingency test.
     else:
         chi = 0
         dof = 0
@@ -35,15 +34,16 @@ def chi_square_test(col1: str, col2: str, cond_cols: List[str], bin_df: pd.DataF
                 dof += dof_i
             except ValueError:
                 # If one of the values is 0 in the 2x2 table.
-                if isinstance(parsed_cond, str):
-                    parsed_cond_str = f"{cond_cols[0]}={parsed_cond}"
-                else:
-                    parsed_cond_str = ", ".join(
-                        [f"{var}={state}" for var, state in zip(cond_cols, parsed_cond)]
-                    )
-                print(
-                    f"Skipping the test {col1} \u27C2 {col2} | {parsed_cond_str}. Not enough samples"
-                )
+                # if isinstance(parsed_cond, str):
+                #     parsed_cond_str = f"{cond_cols[0]}={parsed_cond}"
+                # else:
+                #     parsed_cond_str = ", ".join(
+                #         [f"{var}={state}" for var, state in zip(cond_cols, parsed_cond)]
+                #     )
+                # print(
+                #     f"Skipping the test {col1} \u27C2 {col2} | {parsed_cond_str}. Not enough samples"
+                # )
+                pass
         p_value = 1 - stats.chi2.cdf(chi, df=dof)
 
     # Step 4: Return the values
