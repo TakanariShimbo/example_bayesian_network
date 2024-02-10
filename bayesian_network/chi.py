@@ -15,7 +15,7 @@ def chi_square_test(col1: str, col2: str, cond_cols: List[str], bin_df: pd.DataF
             f"The variables col1 or col2 can't be in cond_cols. Found {col2} in cond_cols."
         )
 
-    # Step 2: Do a simple contingency test if there are no conditional variables.
+    # Step 2: Do contingency test.
     if len(cond_cols) == 0:
         # Do a simple contingency test if there are no conditional variables.
         chi, p_value, dof, _ = stats.chi2_contingency(
