@@ -17,12 +17,13 @@ def chi_square_test(col1: str, col2: str, cond_cols: List[str], bin_df: pd.DataF
 
     # Step 2: Do a simple contingency test if there are no conditional variables.
     if len(cond_cols) == 0:
+        # Do a simple contingency test if there are no conditional variables.
         chi, p_value, dof, _ = stats.chi2_contingency(
             bin_df.groupby([col1, col2]).size().unstack(col2, fill_value=0), lambda_="pearson"
         )
 
-    # Step 3: If there are conditionals variables, iterate over unique states and do the contingency test.
     else:
+        # If there are conditionals variables, iterate over unique states and do the contingency test.
         chi = 0
         dof = 0
         for parsed_cond, parsed_bin_df in bin_df.groupby(cond_cols):
@@ -46,7 +47,7 @@ def chi_square_test(col1: str, col2: str, cond_cols: List[str], bin_df: pd.DataF
                 pass
         p_value = 1 - stats.chi2.cdf(chi, df=dof)
 
-    # Step 4: Return the values
+    # Step 3: Return the values
     return p_value   # type: ignore
 
 
