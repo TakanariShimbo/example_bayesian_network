@@ -1,11 +1,5 @@
 jupyter
-pgmpy==0.1.9
-pandas==1.5.3
-matplotlib==3.8.2
-networkx==3.2.1
-torch==2.2.0
-scipy==1.12.0
-tqdm==4.66.1
-joblib==1.3.2
-statsmodels==0.14.1
-scikit-learn==1.4.0
+pandas
+scipy
+matplotlib
+networkx

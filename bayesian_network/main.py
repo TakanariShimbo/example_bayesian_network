@@ -2,7 +2,6 @@ from typing import List
 
 import pandas as pd
 import numpy as np
-from pgmpy.estimators import ConstraintBasedEstimator
 
 from .connect import ConnectChecker
 from .collector import DisconnectInfoCollector
@@ -13,7 +12,7 @@ class BayesianNetwork:
     def __init__(self, bin_df: pd.DataFrame, n_dim_total: int = 2):
         self._n_dim_total = n_dim_total
         self._df_columns = bin_df.columns.to_numpy()
-        self._estimator = ConstraintBasedEstimator(data=bin_df)
+        self._bin_df = bin_df
         self._connect_dfs: List[pd.DataFrame] = []
         self._labels: List[str] = []
 
@@ -48,7 +47,7 @@ class BayesianNetwork:
         return new_connect_df
 
     def run(self, p_threshold: float = 0.05):
-        connect_checker = ConnectChecker(estimator=self._estimator, p_threshold=p_threshold)
+        connect_checker = ConnectChecker(bin_df=self._bin_df, p_threshold=p_threshold)
 
         for n_dim in range(self._n_dim_total + 1):
             print(f"==================== DIM{n_dim} ====================")

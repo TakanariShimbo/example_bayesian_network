@@ -1,7 +1,8 @@
 from typing import List
 
-from pgmpy.estimators import ConstraintBasedEstimator
-from pgmpy.estimators.CITests import chi_square
+import pandas as pd
+
+from .chi import chi_square_test
 
 
 class ConnectInfo:
@@ -20,11 +21,11 @@ class ConnectInfo:
 
 
 class ConnectChecker:
-    def __init__(self, estimator: ConstraintBasedEstimator, p_threshold: float = 0.05):
-        self._estimator = estimator
+    def __init__(self, bin_df: pd.DataFrame, p_threshold: float = 0.05):
+        self._bin_df = bin_df
         self._p_threshold = p_threshold
 
     def check(self, col1: str, col2: str, cond_cols: List[str] = []) -> ConnectInfo:
-        _, p_val = chi_square(X=col1, Y=col2, Z=cond_cols, data=self._estimator.data, state_names=self._estimator.state_names)
+        p_val = chi_square_test(col1=col1, col2=col2, cond_cols=cond_cols, bin_df=self._bin_df)
         connect_info = ConnectInfo(p_val, col1, col2, cond_cols=cond_cols, p_threshold=self._p_threshold)
         return connect_info
