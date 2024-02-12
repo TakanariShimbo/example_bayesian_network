@@ -6,6 +6,7 @@ import numpy as np
 from .connect import ConnectChecker
 from .collector import DisconnectInfoCollector
 from .applyer import DisconnectApplyer
+from .closeness import ClosenessAnalyzer
 
 
 class BayesianNetwork:
@@ -60,3 +61,16 @@ class BayesianNetwork:
             connect_df_dict[label] = connect_df
 
         return connect_df_dict
+
+    def analyze(self, target_col: str):
+        closeness_dfs = []
+        for connect_df in self._connect_dfs:
+            analyzer = ClosenessAnalyzer(connect_df=connect_df)
+            closeness_df = analyzer.analyze(target_col=target_col)
+            closeness_dfs.append( closeness_df )
+
+        closeness_df_dict = {}
+        for label, closeness_df in zip(self._labels, closeness_dfs):
+            closeness_df_dict[label] = closeness_df
+
+        return closeness_df_dict
