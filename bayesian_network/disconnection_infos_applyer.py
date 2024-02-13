@@ -11,7 +11,6 @@ class DisconnectionInfosApplyer:
     def __init__(self, n_dim: int, connection_df: pd.DataFrame, disconnection_infos: List[ConnectionInfo]):
         self._n_dim = n_dim
         self._connection_df = connection_df
-        self._df_columns = connection_df.columns.to_numpy()
         self._disconnection_infos = disconnection_infos
 
     @staticmethod

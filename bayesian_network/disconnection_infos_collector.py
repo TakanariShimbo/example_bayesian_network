@@ -10,7 +10,7 @@ class DisconnectionInfosCollector:
     def __init__(self, n_dim: int, connection_df: pd.DataFrame, connection_checker: ConnectionChecker):
         self._n_dim = n_dim
         self._connection_df = connection_df
-        self._df_columns = connection_df.columns.to_numpy()
+        self._column_names = connection_df.columns.to_list()
         self._connection_checker = connection_checker
         self._disconnection_infos: List[ConnectionInfo] = []
 
@@ -37,8 +37,8 @@ class DisconnectionInfosCollector:
                 self._collect_if_disconnecting(column1=column1, column2=column2, condition_columns=condition_columns)
             return
 
-        for i in range(start, len(self._df_columns)):
-            next_columns = [*current_columns, self._df_columns[i]]
+        for i in range(start, len(self._column_names)):
+            next_columns = [*current_columns, self._column_names[i]]
             self._collect_disconnection_infos_recursive(current_columns=next_columns, start=i + 1)
 
     def collect(self):
