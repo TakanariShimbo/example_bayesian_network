@@ -8,9 +8,10 @@ from .connection import ConnectionInfo
 
 
 class ConnectionInfosApplyer:
-    def __init__(self, n_dim: int, connection_df: pd.DataFrame, connection_infos: List[ConnectionInfo]):
+    def __init__(self, n_dim: int, connection_df: pd.DataFrame, p_value_df: pd.DataFrame, connection_infos: List[ConnectionInfo]):
         self._n_dim = n_dim
         self._connection_df = connection_df
+        self._p_value_df = p_value_df
         self._connection_infos = connection_infos
 
     @staticmethod
@@ -61,6 +62,10 @@ class ConnectionInfosApplyer:
                 return True
         return False
 
+    def init_p_value_df(self):
+        for connection_info in self._connection_infos:
+            self._p_value_df.loc[connection_info.column1, connection_info.column2] = connection_info.p_value
+
     def filter(self):
         disconnection_infos = [info for info in self._connection_infos if not info.is_connecting]
         disconnection_infos.sort(key=lambda disconnection_info: disconnection_info.p_value, reverse=True)
@@ -84,3 +89,4 @@ class ConnectionInfosApplyer:
 
             print(disconnection_info)
             self._connection_df.loc[disconnection_info.column1, disconnection_info.column2] = False
+            self._p_value_df.loc[disconnection_info.column1, disconnection_info.column2] = disconnection_info.p_value

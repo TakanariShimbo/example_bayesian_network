@@ -42,7 +42,7 @@ class NetworkVisualizer:
                     closenesses.append(closeness_df.loc[column1, column2])
 
         closenesses = np.array(closenesses, dtype=float)
-        edge_colors = plt.colormaps["plasma"]((closenesses-1)/2)
+        edge_colors = plt.colormaps["Greens"](1-(closenesses-1)/3)
 
         G = nx.DiGraph()
         G.add_nodes_from(column_names)
