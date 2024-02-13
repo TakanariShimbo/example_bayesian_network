@@ -3,8 +3,8 @@ from typing import List
 import pandas as pd
 
 from .connection import ConnectionChecker
-from .disconnection_infos_collector import DisconnectionInfosCollector
-from .disconnection_infos_applyer import DisconnectionInfosApplyer
+from .connection_infos_collector import ConnectionInfosCollector
+from .connection_infos_applyer import ConnectionInfosApplyer
 from .closeness_analyzer import ClosenessAnalyzer
 from .network_visualizer import NetworkVisualizer
 
@@ -41,18 +41,23 @@ class BayesianNetwork:
 
     @staticmethod
     def _analyze_connection_step(n_dim: int, connection_checker: ConnectionChecker, connection_df: pd.DataFrame):
+        connection_infos_collector = ConnectionInfosCollector(n_dim=n_dim, connection_df=connection_df, connection_checker=connection_checker)
         print(f"----------------------------------------------------")
-        print(f"             Collect DisconnectionInfos             ")
+        print(f"              Collect ConnectionInfos               ")
         print(f"----------------------------------------------------")
-        disconnection_infos_collector = DisconnectionInfosCollector(n_dim=n_dim, connection_df=connection_df, connection_checker=connection_checker)
-        disconnection_infos_collector.collect()
+        connection_infos = connection_infos_collector.collect()
+
+        new_connect_df = connection_df.copy()
+        connection_infos_applyer = ConnectionInfosApplyer(n_dim=n_dim, connection_df=new_connect_df, connection_infos=connection_infos)
+        print(f"----------------------------------------------------")
+        print(f"              Filter DisconnectionInfos             ")
+        print(f"----------------------------------------------------")
+        connection_infos_applyer.filter()
 
         print(f"----------------------------------------------------")
         print(f"              Apply DisconnectionInfos              ")
         print(f"----------------------------------------------------")
-        new_connect_df = connection_df.copy()
-        disconnection_infos_applyer = DisconnectionInfosApplyer(n_dim=n_dim, connection_df=new_connect_df, disconnection_infos=disconnection_infos_collector._disconnection_infos)
-        disconnection_infos_applyer.apply()
+        connection_infos_applyer.apply()
 
         return new_connect_df
 

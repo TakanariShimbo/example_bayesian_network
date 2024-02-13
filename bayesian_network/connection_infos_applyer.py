@@ -7,11 +7,11 @@ import pandas as pd
 from .connection import ConnectionInfo
 
 
-class DisconnectionInfosApplyer:
-    def __init__(self, n_dim: int, connection_df: pd.DataFrame, disconnection_infos: List[ConnectionInfo]):
+class ConnectionInfosApplyer:
+    def __init__(self, n_dim: int, connection_df: pd.DataFrame, connection_infos: List[ConnectionInfo]):
         self._n_dim = n_dim
         self._connection_df = connection_df
-        self._disconnection_infos = disconnection_infos
+        self._connection_infos = connection_infos
 
     @staticmethod
     def _generate_xxxxxs(n_dim: int):
@@ -61,9 +61,23 @@ class DisconnectionInfosApplyer:
                 return True
         return False
 
+    def filter(self):
+        disconnection_infos = [info for info in self._connection_infos if not info.is_connecting]
+        disconnection_infos.sort(key=lambda disconnection_info: disconnection_info.p_value, reverse=True)
+
+        applicable_disconnection_info = []
+        for disconnection_info in disconnection_infos:
+            columns = [disconnection_info.column1, disconnection_info.column2, *disconnection_info.condition_columns]
+            if not self._check_xxxxxs_is_connecting(columns=columns):
+                continue
+
+            print(disconnection_info)
+            applicable_disconnection_info.append(disconnection_info)
+
+        self._connection_infos = applicable_disconnection_info
+
     def apply(self):
-        self._disconnection_infos.sort(key=lambda disconnection_info: disconnection_info.p_value, reverse=True)
-        for disconnection_info in self._disconnection_infos:
+        for disconnection_info in self._connection_infos:
             columns = [disconnection_info.column1, disconnection_info.column2, *disconnection_info.condition_columns]
             if not self._check_xxxxxs_is_connecting(columns=columns):
                 continue
