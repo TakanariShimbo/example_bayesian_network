@@ -6,6 +6,7 @@ from .connection import ConnectionChecker
 from .disconnection_infos_collector import DisconnectionInfosCollector
 from .disconnection_infos_applyer import DisconnectionInfosApplyer
 from .closeness_analyzer import ClosenessAnalyzer
+from .network_visualizer import NetworkVisualizer
 
 
 class BayesianNetwork:
@@ -81,3 +82,11 @@ class BayesianNetwork:
             closeness_df_dict[label] = closeness_df
 
         return closeness_df_dict
+
+    @staticmethod
+    def visualize_connection(connection_df: pd.DataFrame, title: str):
+        NetworkVisualizer.visualize_connection(connection_df=connection_df, title=title)
+
+    @staticmethod
+    def visualize_closeness(closeness_df: pd.DataFrame, title: str):
+        NetworkVisualizer.visualize_closeness(closeness_df=closeness_df, title=title)
