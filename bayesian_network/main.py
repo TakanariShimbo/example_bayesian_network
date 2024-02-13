@@ -20,6 +20,13 @@ class BayesianNetwork:
         self._connection_dfs.append(init_connection_df)
         self._labels.append("Init")
 
+    @property
+    def connection_df_dict(self):
+        connection_df_dict_ = {}
+        for label, connection_df in zip(self._labels, self._connection_dfs):
+            connection_df_dict_[label] = connection_df
+        return connection_df_dict_
+
     @staticmethod
     def _get_init_connection_df(column_names: List[str]):
         init_connection_df = pd.DataFrame(data=False, index=column_names, columns=column_names, dtype=bool)
@@ -60,11 +67,7 @@ class BayesianNetwork:
             self._labels.append(f"Level{n_dim}")
             print()
 
-        connection_df_dict = {}
-        for label, connection_df in zip(self._labels, self._connection_dfs):
-            connection_df_dict[label] = connection_df
-
-        return connection_df_dict
+        return self.connection_df_dict
 
     def analyze_closeness(self, target_col: str):
         closeness_dfs = []
