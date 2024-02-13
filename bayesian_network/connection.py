@@ -18,11 +18,19 @@ class ConnectionInfo:
         self.column2 = column2
         self.condition_columns = condition_columns
 
+    def _to_string(self) -> str:
+        if self.p_value == None:
+            p_str = f"{self.p_value}"
+        else:
+            p_str = f"{self.p_value:.2f}"
+
+        return f"{self.column1} , {self.column2} | {self.condition_columns} -> {self.is_connecting} [{p_str}]"
+
     def __str__(self) -> str:
-        return f"{self.column1} , {self.column2} | {self.condition_columns} -> {self.is_connecting} [{self.p_value:.2f}]"
+        return self._to_string()
 
     def __repr__(self) -> str:
-        return f"{self.column1} , {self.column2} | {self.condition_columns} -> {self.is_connecting} [{self.p_value:.2f}]"
+        return self._to_string()
 
 
 class ConnectionChecker:
