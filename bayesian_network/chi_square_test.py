@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Optional
 
+import numpy as np
 import pandas as pd
 from scipy import stats
 
 
-def chi_square_test(column1: str, column2: str, condition_columns: List[str], bin_df: pd.DataFrame) -> float:
+def chi_square_test(column1: str, column2: str, condition_columns: List[str], bin_df: pd.DataFrame) -> Optional[float]:
     # Step 1: Check if the arguments are valid and type conversions.
     if column1 in condition_columns:
         raise ValueError(f"The variables column1 or column2 can't be in condition_columns. Found {column1} in condition_columns.")
@@ -40,4 +41,7 @@ def chi_square_test(column1: str, column2: str, condition_columns: List[str], bi
         p_value = 1 - stats.chi2.cdf(chi, df=dof)
 
     # Step 3: Return the values
+    if np.isnan(p_value):
+        return None
+
     return p_value  # type: ignore

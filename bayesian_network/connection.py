@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -6,8 +6,13 @@ from .chi_square_test import chi_square_test
 
 
 class ConnectionInfo:
-    def __init__(self, p_value: float, column1: str, column2: str, condition_columns: List[str] = [], p_threshold: float = 0.05):
-        self.is_connecting = p_value < p_threshold
+    def __init__(self, p_value: Optional[float], column1: str, column2: str, condition_columns: List[str] = [], p_threshold: float = 0.05):
+        if p_value == None:
+            is_connecting = True
+        else:
+            is_connecting = p_value < p_threshold
+
+        self.is_connecting = is_connecting
         self.p_value = p_value
         self.column1 = column1
         self.column2 = column2
