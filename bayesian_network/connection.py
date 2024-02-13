@@ -24,7 +24,7 @@ class ConnectionInfo:
         else:
             p_str = f"{self.p_value:.2f}"
 
-        return f"{self.column1} , {self.column2} | {self.condition_columns} -> {self.is_connecting} [{p_str}]"
+        return f"{self.column1} , {self.column2} | {self.condition_columns} -> is connecting: {self.is_connecting} [{p_str}]"
 
     def __str__(self) -> str:
         return self._to_string()
