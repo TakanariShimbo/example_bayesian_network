@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -6,18 +6,31 @@ from .chi_square_test import chi_square_test
 
 
 class ConnectionInfo:
-    def __init__(self, p_value: float, column1: str, column2: str, condition_columns: List[str] = [], p_threshold: float = 0.05):
-        self.is_connecting = p_value < p_threshold
+    def __init__(self, p_value: Optional[float], column1: str, column2: str, condition_columns: List[str] = [], p_threshold: float = 0.05):
+        if p_value == None:
+            is_connecting = True
+        else:
+            is_connecting = p_value < p_threshold
+
+        self.is_connecting = is_connecting
         self.p_value = p_value
         self.column1 = column1
         self.column2 = column2
         self.condition_columns = condition_columns
 
+    def _to_string(self) -> str:
+        if self.p_value == None:
+            p_str = f"{self.p_value}"
+        else:
+            p_str = f"{self.p_value:.2f}"
+
+        return f"{self.column1} , {self.column2} | {self.condition_columns} -> is connecting: {self.is_connecting} [{p_str}]"
+
     def __str__(self) -> str:
-        return f"{self.column1} , {self.column2} | {self.condition_columns} -> {self.is_connecting} [{self.p_value:.2f}]"
+        return self._to_string()
 
     def __repr__(self) -> str:
-        return f"{self.column1} , {self.column2} | {self.condition_columns} -> {self.is_connecting} [{self.p_value:.2f}]"
+        return self._to_string()
 
 
 class ConnectionChecker:

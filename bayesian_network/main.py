@@ -1,75 +1,102 @@
-from typing import List
+from typing import List, Dict, Tuple
 
 import pandas as pd
 
 from .connection import ConnectionChecker
-from .disconnection_infos_collector import DisconnectionInfosCollector
-from .disconnection_infos_applyer import DisconnectionInfosApplyer
+from .connection_infos_collector import ConnectionInfosCollector
+from .connection_infos_applyer import ConnectionInfosApplyer
 from .closeness_analyzer import ClosenessAnalyzer
+from .network_visualizer import NetworkVisualizer
 
 
 class BayesianNetwork:
-    def __init__(self, bin_df: pd.DataFrame, n_dim_total: int = 2):
-        self._n_dim_total = n_dim_total
-        self._bin_df = bin_df
-        self._connection_dfs: List[pd.DataFrame] = []
-        self._labels: List[str] = []
-
-        df_columns = bin_df.columns.to_list()
-        init_connection_df = self._get_init_connection_df(df_columns=df_columns)
-        self._connection_dfs.append(init_connection_df)
-        self._labels.append("Init")
-
     @staticmethod
-    def _get_init_connection_df(df_columns: List[str]):
-        init_connection_df = pd.DataFrame(data=False, index=df_columns, columns=df_columns, dtype=bool)
+    def _get_init_connection_df(column_names: List[str]) -> pd.DataFrame:
+        init_connection_df = pd.DataFrame(data=False, index=column_names, columns=column_names, dtype=bool)
 
-        for i, column1 in enumerate(df_columns[:-1]):
-            for j in range(i + 1, len(df_columns)):
-                column2 = df_columns[j]
+        for i, column1 in enumerate(column_names[:-1]):
+            for j in range(i + 1, len(column_names)):
+                column2 = column_names[j]
                 init_connection_df.loc[column1, column2] = True
 
         return init_connection_df
 
     @staticmethod
-    def _run_step(n_dim: int, connection_checker: ConnectionChecker, connection_df: pd.DataFrame):
-        print(f"---------- COLECT ----------")
-        disconnection_infos_collector = DisconnectionInfosCollector(n_dim=n_dim, connection_df=connection_df, connection_checker=connection_checker)
-        disconnection_infos_collector.collect()
-        print()
+    def _get_empty_p_value_df(column_names: List[str]) -> pd.DataFrame:
+        p_value_df = pd.DataFrame(data=None, index=column_names, columns=column_names, dtype=float)
+        return p_value_df
 
-        print(f"---------- APPLY ----------")
+    @staticmethod
+    def _analyze_connection_step(n_dim: int, connection_checker: ConnectionChecker, connection_df: pd.DataFrame, p_value_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        connection_infos_collector = ConnectionInfosCollector(n_dim=n_dim, connection_df=connection_df, connection_checker=connection_checker)
+        print(f"----------------------------------------------------")
+        print(f"              Collect ConnectionInfos               ")
+        print(f"----------------------------------------------------")
+        connection_infos = connection_infos_collector.collect()
+
         new_connect_df = connection_df.copy()
-        disconnection_infos_applyer = DisconnectionInfosApplyer(n_dim=n_dim, connection_df=new_connect_df, disconnection_infos=disconnection_infos_collector._disconnection_infos)
-        disconnection_infos_applyer.apply()
-        print()
+        new_p_value_df = p_value_df.copy()
+        connection_infos_applyer = ConnectionInfosApplyer(n_dim=n_dim, connection_df=new_connect_df, p_value_df=new_p_value_df, connection_infos=connection_infos)
+        if n_dim == 0:
+            connection_infos_applyer.init_p_value_df()
+        print(f"----------------------------------------------------")
+        print(f"              Filter DisconnectionInfos             ")
+        print(f"----------------------------------------------------")
+        connection_infos_applyer.filter()
 
-        return new_connect_df
+        print(f"----------------------------------------------------")
+        print(f"              Apply DisconnectionInfos              ")
+        print(f"----------------------------------------------------")
+        connection_infos_applyer.apply()
 
-    def run(self, p_threshold: float = 0.05):
-        connection_checker = ConnectionChecker(bin_df=self._bin_df, p_threshold=p_threshold)
+        return new_connect_df, new_p_value_df
 
-        for n_dim in range(self._n_dim_total + 1):
-            print(f"==================== DIM{n_dim} ====================")
-            new_connection_df = self._run_step(n_dim=n_dim, connection_checker=connection_checker, connection_df=self._connection_dfs[-1])
-            self._connection_dfs.append(new_connection_df)
-            self._labels.append(f"Level{n_dim}")
+    @classmethod
+    def analyze_connection(cls, bin_df: pd.DataFrame, n_dim_total: int = 2, p_threshold: float = 0.05) -> Tuple[Dict[str, pd.DataFrame], Dict[str, pd.DataFrame]]:
+        connection_checker = ConnectionChecker(bin_df=bin_df, p_threshold=p_threshold)
+        connection_dfs: List[pd.DataFrame] = []
+        p_value_dfs: List[pd.DataFrame] = []
+        labels: List[str] = []
+
+        column_names = bin_df.columns.to_list()
+        init_connection_df = cls._get_init_connection_df(column_names=column_names)
+        empty_p_value_df = cls._get_empty_p_value_df(column_names=column_names)
+        connection_dfs.append(init_connection_df)
+        p_value_dfs.append(empty_p_value_df)
+        labels.append("Init")
+
+        for n_dim in range(n_dim_total+1):
+            print(f"====================================================")
+            print(f"                     DIM{n_dim}                     ")
+            print(f"====================================================")
+            new_connection_df, new_p_value_df = cls._analyze_connection_step(n_dim=n_dim, connection_checker=connection_checker, connection_df=connection_dfs[-1], p_value_df=p_value_dfs[-1])
+            connection_dfs.append(new_connection_df)
+            p_value_dfs.append(new_p_value_df)
+            labels.append(f"Level{n_dim}")
+            print()
 
         connection_df_dict = {}
-        for label, connection_df in zip(self._labels, self._connection_dfs):
+        for label, connection_df in zip(labels, connection_dfs):
             connection_df_dict[label] = connection_df
 
-        return connection_df_dict
+        p_value_df_dict = {}
+        for label, p_value_df in zip(labels, p_value_dfs):
+            p_value_df_dict[label] = p_value_df
+        return connection_df_dict, p_value_df_dict
 
-    def analyze(self, target_col: str):
-        closeness_dfs = []
-        for connect_df in self._connection_dfs:
-            analyzer = ClosenessAnalyzer(connection_df=connect_df)
-            closeness_df = analyzer.analyze(target_column=target_col)
-            closeness_dfs.append( closeness_df )
-
+    @staticmethod
+    def analyze_closeness(target_col: str, connection_df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
         closeness_df_dict = {}
-        for label, closeness_df in zip(self._labels, closeness_dfs):
+        for label, connection_df in connection_df_dict.items():
+            analyzer = ClosenessAnalyzer(connection_df=connection_df)
+            closeness_df = analyzer.analyze(target_column=target_col)
             closeness_df_dict[label] = closeness_df
-
         return closeness_df_dict
+
+    @staticmethod
+    def visualize_connection(connection_df: pd.DataFrame, title: str):
+        NetworkVisualizer.visualize_connection(connection_df=connection_df, title=title)
+
+    @staticmethod
+    def visualize_closeness(closeness_df: pd.DataFrame, title: str):
+        NetworkVisualizer.visualize_closeness(closeness_df=closeness_df, title=title)

@@ -6,8 +6,8 @@ import pandas as pd
 class ClosenessAnalyzer:
     def __init__(self, connection_df: pd.DataFrame) -> None:
         self._connection_df = connection_df
-        df_columns = connection_df.columns.to_numpy()
-        self._closeness_df = pd.DataFrame(data=0, index=df_columns, columns=df_columns, dtype=int)
+        column_names = connection_df.columns.to_list()
+        self._closeness_df = pd.DataFrame(data=0, index=column_names, columns=column_names, dtype=int)
     
     def _search_next_columns(self, current_columns: List[str], checked_columns: List[str], closeness_value: int):
         next_columns = []
