@@ -36,7 +36,7 @@ class ConnectionInfosApplyer:
 
     @staticmethod
     def _convert_xxxxx_to_list(xxxxx: str) -> List[int]:
-        return [int(xxxxx[i]) for i in range(len(xxxxx) - 1)]
+        return [int(x) for x in xxxxx]
 
     def _check_xxxxxs_is_connecting(self, xxxxxs: List[str], columns: List[str]) -> bool:
         is_xxxxxs_connecting = True
