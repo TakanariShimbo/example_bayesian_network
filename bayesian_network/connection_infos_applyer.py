@@ -14,15 +14,53 @@ class ConnectionInfosApplyer:
         self._p_value_df = p_value_df
         self._connection_infos = connection_infos
 
-    @staticmethod
-    def _generate_xxxxxs_list(n_dim: int) -> List[List[str]]:
-        base_xxx_list = np.arange(n_dim) + 2
-        permutations_xxx_list = list(itertools.permutations(base_xxx_list))
+    @classmethod
+    def _partition_array(cls, idx: int, arr: List[int], current_partition: List[List[int]], all_partitions: List[List[List[int]]]):
+        if idx == len(arr):
+            all_partitions.append(current_partition)
+            return
+        cls._partition_array(idx + 1, arr, current_partition + [[arr[idx]]], all_partitions)
+        for i in range(len(current_partition)):
+            new_partition = [list(part) for part in current_partition]
+            new_partition[i].append(arr[idx])
+            cls._partition_array(idx + 1, arr, new_partition, all_partitions)
+
+    @classmethod
+    def _generate_all_partitions(cls, arr: List[int]) -> List[List[List[int]]]:
+        all_partitions = []
+        cls._partition_array(0, arr, [], all_partitions)
+        return all_partitions
+
+    @classmethod
+    def _generate_array_permutations(cls, arrays: List[List[int]]) -> List[List[List[int]]]:
+        result = [[]]
+        for array in arrays:
+            current_permutations = list(itertools.permutations(array))
+            temp_result = []
+            for perm in current_permutations:
+                for prev in result:
+                    temp_result.append(prev + [list(perm)])
+            result = temp_result
+        
+        return result
+
+    @classmethod
+    def _generate_xxxxxs_list(cls, n_dim: int) -> List[List[str]]:
+        base_xxx_list = (np.arange(n_dim) + 2).tolist()
+        all_partitions_xxx_list = cls._generate_all_partitions(arr=base_xxx_list)
+        all_permutations_xxx_list = []
+        for partitions_xxx_list in all_partitions_xxx_list:
+            result = cls._generate_array_permutations(arrays=partitions_xxx_list)
+            all_permutations_xxx_list.extend(result)
+
         xxxxxs_list = []
-        for xxx_list in permutations_xxx_list:
-            xxx = ''.join(map(str, xxx_list))
-            xxxxx = f"0{xxx}1"
-            xxxxxs_list.append([xxxxx])
+        for permutations_xxx_list in all_permutations_xxx_list:
+            xxxxxs = []
+            for xxx_list in permutations_xxx_list:
+                xxx = ''.join(map(str, xxx_list))
+                xxxxx = f"0{xxx}1"
+                xxxxxs.append(xxxxx)
+            xxxxxs_list.append(xxxxxs)
         return xxxxxs_list
 
     @staticmethod
